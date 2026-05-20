@@ -65,6 +65,45 @@ npm run preview
 4. Preview the rendered output in the Preview panel
 5. Click the copy icon in the Preview panel to copy the cleaned HTML
 
+## Deployment
+
+### Cloudflare Pages
+
+**Option 1: Connect to Git**
+
+1. Go to [Cloudflare Pages](https://pages.cloudflare.com/)
+2. Click "Create a project" → "Connect to Git"
+3. Select your repository
+4. Configure build settings:
+   - **Build command**: `npm run build`
+   - **Build output directory**: `dist`
+   - **Node.js version**: `20` (set via Environment Variables: `NODE_VERSION = 20`)
+5. Click "Save and Deploy"
+
+**Option 2: Direct Upload via Wrangler CLI**
+
+```bash
+# Install Wrangler globally
+npm install -g wrangler
+
+# Login to Cloudflare
+wrangler login
+
+# Build the project
+npm run build
+
+# Deploy to Cloudflare Pages
+wrangler pages deploy dist --project-name=html-cleaner
+```
+
+### Other Platforms
+
+The project builds to a static `dist/` folder and can be deployed to any static hosting:
+
+- **Vercel**: `vercel --prod`
+- **Netlify**: Set build command to `npm run build` and publish directory to `dist`
+- **GitHub Pages**: Use a GitHub Action to build and deploy the `dist` folder
+
 ## License
 
 MIT
