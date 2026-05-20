@@ -69,15 +69,15 @@ npm run preview
 
 ### Cloudflare Pages
 
-**Option 1: Connect to Git**
+**Option 1: Connect to Git (Recommended)**
 
 1. Go to [Cloudflare Pages](https://pages.cloudflare.com/)
 2. Click "Create a project" → "Connect to Git"
 3. Select your repository
 4. Configure build settings:
+   - **Framework preset**: None
    - **Build command**: `npm run build`
    - **Build output directory**: `dist`
-   - **Node.js version**: `20` (set via Environment Variables: `NODE_VERSION = 20`)
 5. Click "Save and Deploy"
 
 **Option 2: Direct Upload via Wrangler CLI**
