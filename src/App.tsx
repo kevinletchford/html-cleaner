@@ -4,6 +4,7 @@ import { InputPanel } from './components/InputPanel'
 import { CodePanel } from './components/CodePanel'
 import { PreviewPanel } from './components/PreviewPanel'
 import { ResizeHandle } from './components/ResizeHandle'
+import { SettingsSidebar } from './components/SettingsSidebar'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { useClipboard } from './hooks/useClipboard'
 import { cleanHtml, formatHtml } from './lib/cleaner'
@@ -30,6 +31,7 @@ function App() {
     'html-cleaner-panel-widths',
     { input: 33.33, code: 33.33, preview: 33.34 }
   )
+  const [showSettings, setShowSettings] = useLocalStorage<boolean>('html-cleaner-show-settings', false)
 
   // Local state
   const [inputHtml, setInputHtml] = useState('')
@@ -39,21 +41,25 @@ function App() {
   const [isResizing, setIsResizing] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Clipboard hook
   const { copyToClipboard, copied } = useClipboard()
 
-  // Handle paste from input panel
   const handlePaste = useCallback((html: string, _text: string) => {
     setInputHtml(html)
   }, [])
 
-  // Handle preset change - also update options to match preset
   const handlePresetChange = useCallback((newPreset: PresetName) => {
     setPreset(newPreset)
     setOptions(presets[newPreset])
   }, [setPreset, setOptions])
 
-  // Clean HTML when input or options change
+  const handleOptionToggle = useCallback((key: keyof CleaningOptionsType) => {
+    setOptions(prev => ({ ...prev, [key]: !prev[key] }))
+  }, [setOptions])
+
+  const handleOptionsReset = useCallback(() => {
+    setOptions(presets[preset])
+  }, [setOptions, preset])
+
   useEffect(() => {
     if (!inputHtml.trim()) {
       setRawHtml('')
@@ -64,11 +70,8 @@ function App() {
     const processHtml = async () => {
       setIsProcessing(true)
       try {
-        // Format raw HTML for display
         const formattedRaw = await formatHtml(inputHtml)
         setRawHtml(formattedRaw)
-
-        // Clean HTML
         const result = await cleanHtml(inputHtml, options, preset)
         setCleanedHtml(result)
       } catch (error) {
@@ -79,17 +82,14 @@ function App() {
       }
     }
 
-    // Debounce processing
     const timeoutId = setTimeout(processHtml, 100)
     return () => clearTimeout(timeoutId)
   }, [inputHtml, options, preset])
 
-  // Handle copy
   const handleCopy = useCallback(() => {
     copyToClipboard(cleanedHtml)
   }, [copyToClipboard, cleanedHtml])
 
-  // Handle clear
   const handleClear = useCallback(() => {
     setInputHtml('')
     setRawHtml('')
@@ -98,7 +98,6 @@ function App() {
 
   const hasContent = inputHtml.trim().length > 0
 
-  // Calculate widths for visible panels, distributing hidden panel space proportionally
   const getVisibleWidths = useCallback(() => {
     const totalHiddenWidth = (['input', 'code', 'preview'] as const)
       .filter(p => !panelVisibility[p])
@@ -114,33 +113,20 @@ function App() {
     }, {} as Partial<PanelWidths>)
   }, [panelVisibility, panelWidths])
 
-  const handleResizeStart = useCallback(() => {
-    setIsResizing(true)
-  }, [])
-
-  const handleResizeEnd = useCallback(() => {
-    setIsResizing(false)
-  }, [])
+  const handleResizeStart = useCallback(() => setIsResizing(true), [])
+  const handleResizeEnd = useCallback(() => setIsResizing(false), [])
 
   const handleResize = useCallback((leftPanel: keyof PanelWidths, rightPanel: keyof PanelWidths) => (delta: number) => {
     if (!containerRef.current) return
-
     const containerWidth = containerRef.current.offsetWidth
     const deltaPercent = (delta / containerWidth) * 100
-
-    setPanelWidths(prev => {
-      const newLeftWidth = Math.max(10, Math.min(80, prev[leftPanel] + deltaPercent))
-      const newRightWidth = Math.max(10, Math.min(80, prev[rightPanel] - deltaPercent))
-
-      return {
-        ...prev,
-        [leftPanel]: newLeftWidth,
-        [rightPanel]: newRightWidth,
-      }
-    })
+    setPanelWidths(prev => ({
+      ...prev,
+      [leftPanel]: Math.max(10, Math.min(80, prev[leftPanel] + deltaPercent)),
+      [rightPanel]: Math.max(10, Math.min(80, prev[rightPanel] - deltaPercent)),
+    }))
   }, [setPanelWidths])
 
-  // Toggle panel visibility (ensure at least one stays visible)
   const togglePanel = useCallback((panel: keyof PanelVisibility) => {
     setPanelVisibility(prev => {
       const newVisibility = { ...prev, [panel]: !prev[panel] }
@@ -151,75 +137,82 @@ function App() {
   }, [setPanelVisibility])
 
   return (
-    <div className="h-full flex flex-col overflow-hidden" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
+    <div className="h-full flex flex-col overflow-hidden bg-th-bg text-th">
       <Toolbar
         preset={preset}
-        options={options}
         onPresetChange={handlePresetChange}
-        onOptionsChange={setOptions}
         panelVisibility={panelVisibility}
         onPanelVisibilityChange={setPanelVisibility}
+        showSettings={showSettings}
+        onToggleSettings={() => setShowSettings(s => !s)}
       />
 
-      <div ref={containerRef} className="flex-1 min-h-0 flex" style={{ backgroundColor: 'var(--color-border)' }}>
-        {panelVisibility.input && (
-          <>
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        <div ref={containerRef} className="flex-1 min-h-0 flex" style={{ backgroundColor: 'var(--t-border)' }}>
+          {panelVisibility.input && (
+            <>
+              <div
+                className="relative overflow-hidden h-full bg-th-surface"
+                style={{
+                  flex: `0 1 ${getVisibleWidths().input}%`,
+                  minWidth: 0,
+                  pointerEvents: isResizing ? 'none' : 'auto',
+                }}
+              >
+                <InputPanel onPaste={handlePaste} content={inputHtml} onClose={() => togglePanel('input')} onClear={handleClear} hasContent={hasContent} />
+              </div>
+              {(panelVisibility.code || panelVisibility.preview) && (
+                <ResizeHandle
+                  onResize={handleResize('input', panelVisibility.code ? 'code' : 'preview')}
+                  onResizeStart={handleResizeStart}
+                  onResizeEnd={handleResizeEnd}
+                />
+              )}
+            </>
+          )}
+
+          {panelVisibility.code && (
+            <>
+              <div
+                className="overflow-hidden h-full bg-th-surface"
+                style={{
+                  flex: `0 1 ${getVisibleWidths().code}%`,
+                  minWidth: 0,
+                  pointerEvents: isResizing ? 'none' : 'auto',
+                }}
+              >
+                <CodePanel rawCode={rawHtml} cleanCode={cleanedHtml} loading={isProcessing} onClose={() => togglePanel('code')} />
+              </div>
+              {panelVisibility.preview && (
+                <ResizeHandle
+                  onResize={handleResize('code', 'preview')}
+                  onResizeStart={handleResizeStart}
+                  onResizeEnd={handleResizeEnd}
+                />
+              )}
+            </>
+          )}
+
+          {panelVisibility.preview && (
             <div
-              className="relative overflow-hidden h-full"
+              className="overflow-hidden h-full bg-th-surface"
               style={{
-                backgroundColor: 'var(--color-bg-primary)',
-                flex: `0 1 ${getVisibleWidths().input}%`,
+                flex: `0 1 ${getVisibleWidths().preview}%`,
                 minWidth: 0,
                 pointerEvents: isResizing ? 'none' : 'auto',
               }}
             >
-              <InputPanel onPaste={handlePaste} content={inputHtml} onClose={() => togglePanel('input')} onClear={handleClear} hasContent={hasContent} />
+              <PreviewPanel html={cleanedHtml} onClose={() => togglePanel('preview')} onCopy={handleCopy} copied={copied} hasContent={hasContent} />
             </div>
-            {(panelVisibility.code || panelVisibility.preview) && (
-              <ResizeHandle
-                onResize={handleResize('input', panelVisibility.code ? 'code' : 'preview')}
-                onResizeStart={handleResizeStart}
-                onResizeEnd={handleResizeEnd}
-              />
-            )}
-          </>
-        )}
+          )}
+        </div>
 
-        {panelVisibility.code && (
-          <>
-            <div
-              className="overflow-hidden h-full"
-              style={{
-                backgroundColor: 'var(--color-bg-primary)',
-                flex: `0 1 ${getVisibleWidths().code}%`,
-                minWidth: 0,
-                pointerEvents: isResizing ? 'none' : 'auto',
-              }}
-            >
-              <CodePanel rawCode={rawHtml} cleanCode={cleanedHtml} loading={isProcessing} onClose={() => togglePanel('code')} />
-            </div>
-            {panelVisibility.preview && (
-              <ResizeHandle
-                onResize={handleResize('code', 'preview')}
-                onResizeStart={handleResizeStart}
-                onResizeEnd={handleResizeEnd}
-              />
-            )}
-          </>
-        )}
-
-        {panelVisibility.preview && (
-          <div
-            className="overflow-hidden h-full"
-            style={{
-              backgroundColor: 'var(--color-bg-primary)',
-              flex: `0 1 ${getVisibleWidths().preview}%`,
-              minWidth: 0,
-              pointerEvents: isResizing ? 'none' : 'auto',
-            }}
-          >
-            <PreviewPanel html={cleanedHtml} onClose={() => togglePanel('preview')} onCopy={handleCopy} copied={copied} hasContent={hasContent} />
-          </div>
+        {showSettings && (
+          <SettingsSidebar
+            options={options}
+            onToggle={handleOptionToggle}
+            onReset={handleOptionsReset}
+          />
         )}
       </div>
     </div>

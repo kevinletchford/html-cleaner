@@ -57,8 +57,8 @@ export function ResizeHandle({ onResize, onResizeStart, onResizeEnd }: ResizeHan
 
   return (
     <div
-      className="resize-handle flex-shrink-0 w-1 cursor-col-resize hover:bg-blue-500 active:bg-blue-600 transition-colors"
-      style={{ backgroundColor: 'var(--color-border)' }}
+      className="resize-handle flex-shrink-0 w-1 cursor-col-resize transition-colors"
+      style={{ backgroundColor: 'var(--t-border)' }}
       onMouseDown={handleMouseDown}
     />
   )

@@ -1,7 +1,26 @@
-import { useState, CSSProperties } from 'react'
-import Editor from '@monaco-editor/react'
-import { Code2, X } from 'lucide-react'
+import { useState } from 'react'
+import Editor, { type BeforeMount } from '@monaco-editor/react'
 import { useTheme } from '../hooks/useTheme'
+
+type ViewMode = 'clean' | 'raw'
+
+const LIGHT_THEME = 'hc-light'
+const DARK_THEME = 'hc-dark'
+
+const defineThemes: BeforeMount = (monaco) => {
+  monaco.editor.defineTheme(LIGHT_THEME, {
+    base: 'vs',
+    inherit: true,
+    rules: [],
+    colors: { 'editor.background': '#ffffff' },
+  })
+  monaco.editor.defineTheme(DARK_THEME, {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [],
+    colors: { 'editor.background': '#2c2c2c' },
+  })
+}
 
 interface CodePanelProps {
   rawCode: string
@@ -10,16 +29,22 @@ interface CodePanelProps {
   onClose?: () => void
 }
 
-type ViewMode = 'clean' | 'raw'
-
-const buttonActive: CSSProperties = {
-  backgroundColor: '#2563eb',
-  color: '#ffffff',
+function CodeIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="16 18 22 12 16 6"/>
+      <polyline points="8 6 2 12 8 18"/>
+    </svg>
+  )
 }
 
-const buttonInactive: CSSProperties = {
-  backgroundColor: 'var(--color-bg-button)',
-  color: 'var(--color-text-primary)',
+function XIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  )
 }
 
 export function CodePanel({ rawCode, cleanCode, loading, onClose }: CodePanelProps) {
@@ -30,28 +55,23 @@ export function CodePanel({ rawCode, cleanCode, loading, onClose }: CodePanelPro
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="flex-shrink-0 h-10 px-3 flex items-center justify-between text-sm font-medium border-b"
-        style={{
-          backgroundColor: 'var(--color-bg-secondary)',
-          borderColor: 'var(--color-border)',
-          color: 'var(--color-text-muted)',
-        }}
-      >
+      <div className="flex-shrink-0 h-10 px-3 flex items-center justify-between border-b border-th bg-th-surface text-th-muted">
         <div className="flex items-center gap-2">
-          <Code2 className="w-4 h-4" />
+          <CodeIcon />
           <div className="flex items-center gap-1">
             <button
               onClick={() => setViewMode('clean')}
-              className="px-2 py-1 text-xs rounded transition-colors"
-              style={viewMode === 'clean' ? buttonActive : buttonInactive}
+              className={`h-6 px-2 text-xs rounded transition-colors ${
+                viewMode === 'clean' ? 'bg-accent text-white' : 'bg-th-surface2 text-th hover:bg-th-surface3'
+              }`}
             >
               Clean
             </button>
             <button
               onClick={() => setViewMode('raw')}
-              className="px-2 py-1 text-xs rounded transition-colors"
-              style={viewMode === 'raw' ? buttonActive : buttonInactive}
+              className={`h-6 px-2 text-xs rounded transition-colors ${
+                viewMode === 'raw' ? 'bg-accent text-white' : 'bg-th-surface2 text-th hover:bg-th-surface3'
+              }`}
             >
               Raw
             </button>
@@ -59,15 +79,15 @@ export function CodePanel({ rawCode, cleanCode, loading, onClose }: CodePanelPro
         </div>
         <div className="flex items-center gap-2">
           {loading && (
-            <span className="text-xs text-blue-500 animate-pulse">Processing...</span>
+            <span className="text-xs text-th-muted animate-pulse">Processing…</span>
           )}
           {onClose && (
             <button
               onClick={onClose}
-              className="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+              className="p-1 rounded hover:bg-th-surface2 transition-colors"
               title="Close panel"
             >
-              <X className="w-4 h-4" />
+              <XIcon />
             </button>
           )}
         </div>
@@ -79,7 +99,8 @@ export function CodePanel({ rawCode, cleanCode, loading, onClose }: CodePanelPro
           height="100%"
           language="html"
           value={code}
-          theme={theme === 'dark' ? 'vs-dark' : 'light'}
+          theme={theme === 'dark' ? DARK_THEME : LIGHT_THEME}
+          beforeMount={defineThemes}
           options={{
             readOnly: true,
             minimap: { enabled: false },
