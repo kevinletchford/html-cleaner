@@ -47,7 +47,7 @@ export function PreviewPanel({ html, onClose, onCopy, copied, hasContent }: Prev
   const { theme } = useTheme()
 
   const isDark = theme === 'dark'
-  const bgColor = isDark ? '#2c2c2c' : '#ffffff'
+  const bgColor = isDark ? '#1e1e1e' : '#f5f5f5'
   const textColor = isDark ? '#ffffff' : '#1a1a1a'
   const borderColor = isDark ? '#3c3c3c' : '#e0e0e0'
   const mutedColor = isDark ? '#8c8c8c' : '#6e6e6e'

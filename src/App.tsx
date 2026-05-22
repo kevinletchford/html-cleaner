@@ -152,7 +152,7 @@ function App() {
           {panelVisibility.input && (
             <>
               <div
-                className="relative overflow-hidden h-full bg-th-surface"
+                className="relative overflow-hidden h-full bg-th-bg"
                 style={{
                   flex: `0 1 ${getVisibleWidths().input}%`,
                   minWidth: 0,
@@ -174,7 +174,7 @@ function App() {
           {panelVisibility.code && (
             <>
               <div
-                className="overflow-hidden h-full bg-th-surface"
+                className="overflow-hidden h-full bg-th-bg"
                 style={{
                   flex: `0 1 ${getVisibleWidths().code}%`,
                   minWidth: 0,
@@ -195,7 +195,7 @@ function App() {
 
           {panelVisibility.preview && (
             <div
-              className="overflow-hidden h-full bg-th-surface"
+              className="overflow-hidden h-full bg-th-bg"
               style={{
                 flex: `0 1 ${getVisibleWidths().preview}%`,
                 minWidth: 0,

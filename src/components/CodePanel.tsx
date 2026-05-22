@@ -12,13 +12,13 @@ const defineThemes: BeforeMount = (monaco) => {
     base: 'vs',
     inherit: true,
     rules: [],
-    colors: { 'editor.background': '#ffffff' },
+    colors: { 'editor.background': '#f5f5f5' },
   })
   monaco.editor.defineTheme(DARK_THEME, {
     base: 'vs-dark',
     inherit: true,
     rules: [],
-    colors: { 'editor.background': '#2c2c2c' },
+    colors: { 'editor.background': '#1e1e1e' },
   })
 }
 
@@ -62,7 +62,7 @@ export function CodePanel({ rawCode, cleanCode, loading, onClose }: CodePanelPro
             <button
               onClick={() => setViewMode('clean')}
               className={`h-6 px-2 text-xs rounded transition-colors ${
-                viewMode === 'clean' ? 'bg-accent text-white' : 'bg-th-surface2 text-th hover:bg-th-surface3'
+                viewMode === 'clean' ? 'bg-accent text-white' : 'bg-th-bg text-th-muted hover:bg-th-surface2'
               }`}
             >
               Clean
@@ -70,7 +70,7 @@ export function CodePanel({ rawCode, cleanCode, loading, onClose }: CodePanelPro
             <button
               onClick={() => setViewMode('raw')}
               className={`h-6 px-2 text-xs rounded transition-colors ${
-                viewMode === 'raw' ? 'bg-accent text-white' : 'bg-th-surface2 text-th hover:bg-th-surface3'
+                viewMode === 'raw' ? 'bg-accent text-white' : 'bg-th-bg text-th-muted hover:bg-th-surface2'
               }`}
             >
               Raw

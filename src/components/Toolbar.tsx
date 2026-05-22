@@ -132,10 +132,10 @@ export function Toolbar({
 
           <div className="w-px h-5 bg-th-surface3" />
 
-          <div className="flex items-center rounded overflow-hidden border border-th">
+          <div className="flex items-center rounded overflow-hidden bg-th-bg">
             <button
               onClick={() => togglePanel('input')}
-              className={`flex items-center px-2.5 h-7 border-r border-th transition-colors ${
+              className={`flex items-center px-2.5 h-7 transition-colors ${
                 panelVisibility.input ? 'bg-accent text-white' : 'text-th-muted hover:bg-th-surface2'
               }`}
               title="Toggle Input panel"
@@ -144,7 +144,7 @@ export function Toolbar({
             </button>
             <button
               onClick={() => togglePanel('code')}
-              className={`flex items-center px-2.5 h-7 border-r border-th transition-colors ${
+              className={`flex items-center px-2.5 h-7 transition-colors ${
                 panelVisibility.code ? 'bg-accent text-white' : 'text-th-muted hover:bg-th-surface2'
               }`}
               title="Toggle Code panel"
@@ -166,7 +166,7 @@ export function Toolbar({
 
         {/* Right: intensity slider + settings + theme */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-3 px-3 py-1.5 rounded bg-th-surface2">
+          <div className="flex items-center gap-3 h-7 px-3 rounded bg-th-bg">
             <span className="text-xs font-medium text-th-muted">Intensity</span>
             <div className="relative flex items-center" style={{ width: '44px' }}>
               <div

@@ -92,7 +92,7 @@ export function InputPanel({ onPaste, content, onClose, onClear, hasContent }: I
         ref={editorRef}
         contentEditable
         onPaste={handlePaste}
-        className="flex-1 p-4 overflow-y-auto focus:outline-none input-content min-h-0 bg-th-surface text-th"
+        className="flex-1 p-4 overflow-y-auto focus:outline-none input-content min-h-0 bg-th-bg text-th"
         dangerouslySetInnerHTML={{ __html: content }}
         suppressContentEditableWarning
       />
